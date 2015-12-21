@@ -1,7 +1,7 @@
 # FPSBar
 
 ### Usage
-```objc
+```swift
 func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
 
 //
