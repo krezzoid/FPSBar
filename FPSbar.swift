@@ -26,40 +26,41 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-
 import Foundation
 import UIKit
 import QuartzCore
 
 class FPSbar: UIWindow {
+    static let sharedInstance = FPSbar(frame: UIApplication.sharedApplication().statusBarFrame.height != 0 ?
+        UIApplication.sharedApplication().statusBarFrame :
+        CGRect(x: 0.0, y: 0.0, width: UIScreen.mainScreen().bounds.width, height: 20.0) )
+    
     var desiredChartUpdateInterval: NSTimeInterval = 1.0 / 60.0
     var showsAverage: Bool = false
     
-    internal var _displayLink: CADisplayLink!
+    private var _displayLink: CADisplayLink!
     
-    internal var _historyDTLength: Int!
-    internal var _maxHistoryDTLength: Int!
+    private var _historyDTLength: Int = 0
+    private var _maxHistoryDTLength: Int = 0
     
-    internal var _historyDT: [CFTimeInterval]!
-    internal var _displayLinkTickTimeLast: CFTimeInterval!
-    internal var _lastUIUpdateTime: CFTimeInterval!
-
-    internal var _fpsTextLayer: CATextLayer!
-    internal var _chartLayer: CAShapeLayer!
+    private var _historyDT: [CFTimeInterval]!
+    private var _displayLinkTickTimeLast: CFTimeInterval!
+    private var _lastUIUpdateTime: CFTimeInterval!
     
-    internal let selSingleTap : Selector = "displayLinkTick"
+    private var _fpsTextLayer: CATextLayer!
+    private var _chartLayer: CAShapeLayer!
     
-    // codebeat:disable[ABC]
+    private let selSingleTap: Selector = #selector(FPSbar.displayLinkTick)
+    
     func initilize() {
         if Float(UIDevice.currentDevice().systemVersion) >= 9.0 {
             self.rootViewController = UIViewController() // iOS 9 requires rootViewController for any window
         }
-
-        _historyDTLength = Int(0)
-        _maxHistoryDTLength = Int (CGRectGetWidth(self.bounds));
-
+        
+        _maxHistoryDTLength = Int (self.bounds.width)
+        
         _historyDT = Array.init(count: _maxHistoryDTLength, repeatedValue: 0.0)
-        _displayLinkTickTimeLast = CACurrentMediaTime();
+        _displayLinkTickTimeLast = CACurrentMediaTime()
         _lastUIUpdateTime = 0.0
         
         self.windowLevel = (UIWindowLevelStatusBar + 1.0)
@@ -76,26 +77,28 @@ class FPSbar: UIWindow {
         _chartLayer.strokeColor = UIColor.redColor().CGColor
         _chartLayer.contentsScale = UIScreen.mainScreen().scale
         self.layer.addSublayer(_chartLayer)
-
+        
         // Info Layer
-        _fpsTextLayer = CATextLayer();
+        _fpsTextLayer = CATextLayer()
         _fpsTextLayer.frame = CGRect(x:2.5, y:self.bounds.size.height - 11.0, width:200.0, height:10.0)
         _fpsTextLayer.fontSize = 9.0
         _fpsTextLayer.foregroundColor = UIColor.greenColor().CGColor
         _fpsTextLayer.contentsScale = UIScreen.mainScreen().scale
         self.layer.addSublayer(_fpsTextLayer)
-
+        
         // Draw asynchronously on iOS6+
         _chartLayer.drawsAsynchronously = true
         _fpsTextLayer.drawsAsynchronously = true
         
         _displayLink.paused = false
     }
-
+    
     func displayLinkTick() {
         // Shift up the buffer
-        for (var i = _historyDTLength; i >= 1; i-=1) {
-            _historyDT[i] = _historyDT[i - 1]
+        if _historyDTLength > 1 {
+            for i in (1..._historyDTLength).reverse() {
+                _historyDT[i] = _historyDT[i - 1]
+            }
         }
         
         // Store new state
@@ -107,7 +110,7 @@ class FPSbar: UIWindow {
         }
         
         // Store last timestamp
-        _displayLinkTickTimeLast = _displayLink.timestamp;
+        _displayLinkTickTimeLast = _displayLink.timestamp
         
         // Update UI
         let timeSinceLastUIUpdate = _displayLinkTickTimeLast - _lastUIUpdateTime
@@ -116,10 +119,9 @@ class FPSbar: UIWindow {
         }
     }
     
-    // codebeat:disable[ABC]
     private func updateChartAndText() {
         let path = UIBezierPath()
-        path.moveToPoint(CGPointZero)
+        path.moveToPoint(CGPoint.zero)
         
         var maxDT = CGFloat.min
         var avgDT = 0.0
@@ -131,9 +133,9 @@ class FPSbar: UIWindow {
             _fpsTextLayer.foregroundColor = UIColor.greenColor().CGColor
         }
         
-        for (var i = 0; i <= _historyDTLength; i++) {
+        for i in 0..._historyDTLength {
             maxDT = max(CGFloat(maxDT), CGFloat(_historyDT[i]))
-            avgDT += _historyDT[i];
+            avgDT += _historyDT[i]
             
             let fraction = roundf(Float(1.0 / Float(_historyDT[i]))) / 60.0
             
@@ -151,7 +153,7 @@ class FPSbar: UIWindow {
         let minFPS = roundf(1.0 / Float(maxDT))
         let avgFPS = roundf(1.0 / Float(avgDT))
         
-        var text = "";
+        var text = ""
         if showsAverage {
             text = "cur: " + String(curDT) + " | low: " + String(minFPS) + " | avg: " + String(avgFPS)
         } else {
