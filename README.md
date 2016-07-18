@@ -1,4 +1,5 @@
 # FPSBar
+[![codebeat badge](https://codebeat.co/badges/258d3467-b079-4326-842e-b66c435b8257)](https://codebeat.co/projects/github-com-krezzoid-fpsbar)
 
 ### Usage
 ```swift
