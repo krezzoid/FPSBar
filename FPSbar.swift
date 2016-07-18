@@ -35,20 +35,21 @@ class FPSbar: UIWindow {
     var desiredChartUpdateInterval: NSTimeInterval = 1.0 / 60.0
     var showsAverage: Bool = false
     
-    private var _displayLink: CADisplayLink?
+    internal var _displayLink: CADisplayLink?
     
-    private var _historyDTLength: Int?
-    private var _maxHistoryDTLength: Int?
+    internal var _historyDTLength: Int?
+    internal var _maxHistoryDTLength: Int?
     
-    private var _historyDT: [CFTimeInterval]?
-    private var _displayLinkTickTimeLast: CFTimeInterval?
-    private var _lastUIUpdateTime: CFTimeInterval?
+    internal var _historyDT: [CFTimeInterval]?
+    internal var _displayLinkTickTimeLast: CFTimeInterval?
+    internal var _lastUIUpdateTime: CFTimeInterval?
 
-    private var _fpsTextLayer: CATextLayer?
-    private var _chartLayer: CAShapeLayer?
+    internal var _fpsTextLayer: CATextLayer?
+    internal var _chartLayer: CAShapeLayer?
     
-    private let selSingleTap : Selector = "displayLinkTick"
+    internal let selSingleTap : Selector = "displayLinkTick"
     
+    // codebeat:disable[ABC]
     func initilize() {
         if Float(UIDevice.currentDevice().systemVersion) >= 9.0 {
             self.rootViewController = UIViewController() // iOS 9 requires rootViewController for any window
@@ -115,6 +116,7 @@ class FPSbar: UIWindow {
         }
     }
     
+    // codebeat:disable[ABC]
     private func updateChartAndText() {
         let path = UIBezierPath()
         path.moveToPoint(CGPointZero)
