@@ -35,17 +35,17 @@ class FPSbar: UIWindow {
     var desiredChartUpdateInterval: NSTimeInterval = 1.0 / 60.0
     var showsAverage: Bool = false
     
-    internal var _displayLink: CADisplayLink?
+    internal var _displayLink: CADisplayLink!
     
-    internal var _historyDTLength: Int?
-    internal var _maxHistoryDTLength: Int?
+    internal var _historyDTLength: Int!
+    internal var _maxHistoryDTLength: Int!
     
-    internal var _historyDT: [CFTimeInterval]?
-    internal var _displayLinkTickTimeLast: CFTimeInterval?
-    internal var _lastUIUpdateTime: CFTimeInterval?
+    internal var _historyDT: [CFTimeInterval]!
+    internal var _displayLinkTickTimeLast: CFTimeInterval!
+    internal var _lastUIUpdateTime: CFTimeInterval!
 
-    internal var _fpsTextLayer: CATextLayer?
-    internal var _chartLayer: CAShapeLayer?
+    internal var _fpsTextLayer: CATextLayer!
+    internal var _chartLayer: CAShapeLayer!
     
     internal let selSingleTap : Selector = "displayLinkTick"
     
@@ -58,7 +58,7 @@ class FPSbar: UIWindow {
         _historyDTLength = Int(0)
         _maxHistoryDTLength = Int (CGRectGetWidth(self.bounds));
 
-        _historyDT = Array.init(count: _maxHistoryDTLength!, repeatedValue: 0.0)
+        _historyDT = Array.init(count: _maxHistoryDTLength, repeatedValue: 0.0)
         _displayLinkTickTimeLast = CACurrentMediaTime();
         _lastUIUpdateTime = 0.0
         
@@ -67,51 +67,51 @@ class FPSbar: UIWindow {
         
         // Track FPS using display link
         _displayLink = CADisplayLink(target: self, selector: selSingleTap)
-        _displayLink!.paused = true
-        _displayLink!.addToRunLoop(NSRunLoop.currentRunLoop(), forMode: NSRunLoopCommonModes)
+        _displayLink.paused = true
+        _displayLink.addToRunLoop(NSRunLoop.currentRunLoop(), forMode: NSRunLoopCommonModes)
         
         // Chart Layer
         _chartLayer = CAShapeLayer()
-        _chartLayer!.frame = self.bounds
-        _chartLayer!.strokeColor = UIColor.redColor().CGColor
-        _chartLayer!.contentsScale = UIScreen.mainScreen().scale
-        self.layer.addSublayer(_chartLayer!)
+        _chartLayer.frame = self.bounds
+        _chartLayer.strokeColor = UIColor.redColor().CGColor
+        _chartLayer.contentsScale = UIScreen.mainScreen().scale
+        self.layer.addSublayer(_chartLayer)
 
         // Info Layer
         _fpsTextLayer = CATextLayer();
-        _fpsTextLayer!.frame = CGRect(x:2.5, y:self.bounds.size.height - 11.0, width:200.0, height:10.0)
-        _fpsTextLayer!.fontSize = 9.0
-        _fpsTextLayer!.foregroundColor = UIColor.greenColor().CGColor
-        _fpsTextLayer!.contentsScale = UIScreen.mainScreen().scale
-        self.layer.addSublayer(_fpsTextLayer!)
+        _fpsTextLayer.frame = CGRect(x:2.5, y:self.bounds.size.height - 11.0, width:200.0, height:10.0)
+        _fpsTextLayer.fontSize = 9.0
+        _fpsTextLayer.foregroundColor = UIColor.greenColor().CGColor
+        _fpsTextLayer.contentsScale = UIScreen.mainScreen().scale
+        self.layer.addSublayer(_fpsTextLayer)
 
         // Draw asynchronously on iOS6+
-        _chartLayer!.drawsAsynchronously = true
-        _fpsTextLayer!.drawsAsynchronously = true
+        _chartLayer.drawsAsynchronously = true
+        _fpsTextLayer.drawsAsynchronously = true
         
-        _displayLink!.paused = false
+        _displayLink.paused = false
     }
 
     func displayLinkTick() {
         // Shift up the buffer
-        for (var i = _historyDTLength!; i >= 1; i-=1) {
-            _historyDT![i] = _historyDT![i - 1]
+        for (var i = _historyDTLength; i >= 1; i-=1) {
+            _historyDT[i] = _historyDT[i - 1]
         }
         
         // Store new state
-        _historyDT![0] = _displayLink!.timestamp - _displayLinkTickTimeLast!
+        _historyDT[0] = _displayLink.timestamp - _displayLinkTickTimeLast
         
         // Update length if there is more place
-        if _historyDTLength! < (_maxHistoryDTLength! - 1) {
-            _historyDTLength! += 1
+        if _historyDTLength < (_maxHistoryDTLength - 1) {
+            _historyDTLength += 1
         }
         
         // Store last timestamp
-        _displayLinkTickTimeLast! = _displayLink!.timestamp;
+        _displayLinkTickTimeLast = _displayLink.timestamp;
         
         // Update UI
-        let timeSinceLastUIUpdate = _displayLinkTickTimeLast! - _lastUIUpdateTime!
-        if _historyDT![0] < 0.1 && timeSinceLastUIUpdate >= desiredChartUpdateInterval {
+        let timeSinceLastUIUpdate = _displayLinkTickTimeLast - _lastUIUpdateTime
+        if _historyDT[0] < 0.1 && timeSinceLastUIUpdate >= desiredChartUpdateInterval {
             self.updateChartAndText()
         }
     }
@@ -123,30 +123,30 @@ class FPSbar: UIWindow {
         
         var maxDT = CGFloat.min
         var avgDT = 0.0
-        let curDT = roundf(1.0 / Float(Float(_historyDT![0])))
+        let curDT = roundf(1.0 / Float(Float(_historyDT[0])))
         
         if curDT < 30.0 {
-            _fpsTextLayer!.foregroundColor = UIColor.redColor().CGColor
+            _fpsTextLayer.foregroundColor = UIColor.redColor().CGColor
         } else {
-            _fpsTextLayer!.foregroundColor = UIColor.greenColor().CGColor
+            _fpsTextLayer.foregroundColor = UIColor.greenColor().CGColor
         }
         
-        for (var i = 0; i <= _historyDTLength!; i++) {
-            maxDT = max(CGFloat(maxDT), CGFloat(_historyDT![i]))
-            avgDT += _historyDT![i];
+        for (var i = 0; i <= _historyDTLength; i++) {
+            maxDT = max(CGFloat(maxDT), CGFloat(_historyDT[i]))
+            avgDT += _historyDT[i];
             
-            let fraction = roundf(Float(1.0 / Float(_historyDT![i]))) / 60.0
+            let fraction = roundf(Float(1.0 / Float(_historyDT[i]))) / 60.0
             
-            var y = Float(_chartLayer!.frame.size.height) - Float(_chartLayer!.frame.size.height) * fraction
-            y = max(0.0, min(Float(_chartLayer!.frame.size.height), y))
+            var y = Float(_chartLayer.frame.size.height) - Float(_chartLayer.frame.size.height) * fraction
+            y = max(0.0, min(Float(_chartLayer.frame.size.height), y))
             
             path.addLineToPoint(CGPoint(x: Double(i) + 1.0, y: Double(y)))
         }
         
-        path.addLineToPoint(CGPoint(x: Double(_historyDTLength!), y: 0.0))
+        path.addLineToPoint(CGPoint(x: Double(_historyDTLength), y: 0.0))
         
-        avgDT /= Double(_historyDTLength!)
-        _chartLayer!.path = path.CGPath
+        avgDT /= Double(_historyDTLength)
+        _chartLayer.path = path.CGPath
         
         let minFPS = roundf(1.0 / Float(maxDT))
         let avgFPS = roundf(1.0 / Float(avgDT))
@@ -157,7 +157,7 @@ class FPSbar: UIWindow {
         } else {
             text = "cur: " + String(curDT) + " | low: " + String(minFPS)
         }
-        _fpsTextLayer?.string = text
+        _fpsTextLayer.string = text
         
         _lastUIUpdateTime = _displayLinkTickTimeLast
     }
