@@ -52,6 +52,7 @@ class FPSbar: UIWindow {
     
     private let selSingleTap: Selector = #selector(FPSbar.displayLinkTick)
     
+    // codebeat:disable[ABC]
     func initilize() {
         if Float(UIDevice.currentDevice().systemVersion) >= 9.0 {
             self.rootViewController = UIViewController() // iOS 9 requires rootViewController for any window
@@ -119,6 +120,7 @@ class FPSbar: UIWindow {
         }
     }
     
+    // codebeat:disable[ABC]
     private func updateChartAndText() {
         let path = UIBezierPath()
         path.moveToPoint(CGPoint.zero)
