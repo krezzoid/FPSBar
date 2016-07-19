@@ -30,6 +30,7 @@ import Foundation
 import UIKit
 import QuartzCore
 
+// codebeat:disable[TOO_MANY_IVARS]
 class FPSbar: UIWindow {
     static let sharedInstance = FPSbar(frame: UIApplication.sharedApplication().statusBarFrame.height != 0 ?
         UIApplication.sharedApplication().statusBarFrame :
